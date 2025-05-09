@@ -6,18 +6,12 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 5001;
+const port = process.env.PORT || 5050;
 
 app.use(cors());
 app.use(express.json());
 
-// ✅ Updated MongoDB client with proper TLS options for Render
-const client = new MongoClient(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  tls: true,
-  tlsAllowInvalidCertificates: false,
-});
+const client = new MongoClient(process.env.MONGO_URI); // No options needed
 
 async function run() {
   try {
@@ -26,8 +20,8 @@ async function run() {
 
     const db = client.db('MindForgeDB');
 
-    // === Sessions Collection ===
     const sessions = db.collection('sessions');
+    const tutors = db.collection('tutors');
 
     app.get('/sessions', async (req, res) => {
       console.log("➡️ /sessions hit");
@@ -35,10 +29,6 @@ async function run() {
       res.send(result);
     });
 
-    // === Tutors Collection ===
-    const tutors = db.collection('tutors');
-
-    // GET all tutors
     app.get('/tutors', async (req, res) => {
       try {
         console.log("➡️ /tutors hit");
@@ -50,7 +40,6 @@ async function run() {
       }
     });
 
-    // POST new tutor
     app.post('/tutors/add', async (req, res) => {
       try {
         const newTutor = req.body;
